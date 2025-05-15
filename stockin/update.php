@@ -1,10 +1,28 @@
 <?php
 include('conn.php');
-if(isset($_GET['P_id'])){
+
+if (isset($_GET['P_id'])) {
     $P_id = $_GET['P_id'];
     $result = mysqli_query($conn, "SELECT * FROM stockin WHERE P_id='$P_id'");
-        $row = mysqli_fetch_assoc($result);
-  
+    $row = mysqli_fetch_assoc($result);
+} else {
+    header("Location: select.php");
+    exit();
+}
+
+if (isset($_POST['update'])) {
+    $P_id = $_POST['P_id'];
+    $date = $_POST['date'];
+    $quantity = $_POST['quantity'];
+    $unit_price = $_POST['unit_price'];
+
+    // Update the stockin record
+    $update_query = "UPDATE stockin SET Date='$date', stockin_Quantity='$quantity', U_price='$unit_price' WHERE P_id='$P_id'";
+    if (mysqli_query($conn, $update_query)) {
+        echo "<script>alert('Record updated successfully!'); window.location.href='select.php';</script>";
+    } else {
+        echo "Error updating record: " . mysqli_error($conn);
+    }
 }
 ?>
 
@@ -13,30 +31,32 @@ if(isset($_GET['P_id'])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Product</title>
+    <title>Update Stockin - Saint Anne Stock Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <form action="" method="post">
-        Date: <input type="date" name="Date" value="<?php echo isset($row['Date']) ? $row['Date'] : ''; ?>"> <br>
-        Quantity: <input type="text" name="stockin_quantity" value="<?php echo isset($row['stockin_quantity']) ? $row['stockin_quantity'] : ''; ?>"> <br>
-        Unit Price: <input type="text" name="U_price" value="<?php echo isset($row['U_price']) ? $row['U_price'] : ''; ?>"> <br>
-        Total Price: <input type="text" name="T_price" value="<?php echo isset($row['T_price']) ? $row['T_price'] : ''; ?>"> <br>
-        <button name="add">Update</button>
-    </form>
+    <div class="container mt-5">
+        <h2>Update Stockin</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label for="P_id" class="form-label">Product ID</label>
+                <input type="text" class="form-control" id="P_id" name="P_id" value="<?php echo $row['P_id']; ?>" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">Date</label>
+                <input type="date" class="form-control" id="date" name="date" value="<?php echo $row['Date']; ?>" required>
+            </div>
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" value="<?php echo $row['stockin_Quantity']; ?>" required>
+            </div>
+            <div class="mb-3">
+                <label for="unit_price" class="form-label">Unit Price</label>
+                <input type="number" class="form-control" id="unit_price" name="unit_price" value="<?php echo $row['U_price']; ?>" required>
+            </div>
+            <button type="submit" name="update" class="btn btn-primary">Update</button>
+            <a href="select.php" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </body>
 </html>
-
-<?php
-if(isset($_POST['add']) ){
-    $Date = $_POST['Date'];
-    $stockin_quantity = $_POST['stockin_quantity'];
-    $U_price = $_POST['U_price'];
-    $T_price = $_POST['T_price'];
-
-    $update = mysqli_query($conn, "UPDATE stockin SET `Date`='$Date', stockin_quantity='$stockin_quantity', U_price='$U_price', T_price='$T_price' WHERE P_id='$P_id'");
-    if($update){
-        header('location:select.php');
-        exit;
-    }
-}
-?>
